@@ -16,6 +16,8 @@
 
 package com.skydoves.pokedex.core
 
+import com.skydoves.pokedex.core.PokedexFeatureFlags.EnableTransformationLayout
+
 /** Contains feature flags for the Pokedex hero benchmark target */
 object PokedexFeatureFlags {
     /**
@@ -25,14 +27,31 @@ object PokedexFeatureFlags {
     var EnableTransformationLayout = true
 
     /**
+     * Whether to enable Palette color extraction from loaded bitmaps. Disabled by default for
+     * benchmark performance and stability.
+     */
+    var EnablePaletteExtraction = false
+
+    /**
      * Whether to enable shared element transitions between the activities.
      * [EnableTransformationLayout] must be set to true, otherwise this flag will be false.
      */
     var EnableSharedElementTransitions = true
         get() = EnableTransformationLayout && field
 
+    /**
+     * Whether to explicitly disable the overscroll effect for the hierarchy. Overscroll relies on
+     * shaders on newer API levels, which need to be compiled. In benchmarks, we kill the shader
+     * cache, which means that we incur a significant cost when initially compiling the shader.
+     *
+     * Inconsistencies in adb input injection mean that we sometimes end up hitting the bounds of
+     * the list. We disable overscroll by default to stabilize benchmark results.
+     */
+    var DisableOverscrollEffect = true
+
     object Keys {
         const val POKEDEX_ENABLE_TRANSFORMATION_LAYOUT = "enableSharedTransitionScope"
         const val POKEDEX_ENABLE_SHARED_ELEMENT_TRANSITIONS = "enableSharedElementTransitions"
+        const val POKEDEX_API_URL = "apiUrl"
     }
 }
