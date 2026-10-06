@@ -212,7 +212,14 @@ class PokedexViewsHomeActivity : AppCompatActivity(R.layout.activity_main) {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.pokemonList.collect { pokemonList -> adapter.submitList(pokemonList) }
+                    viewModel.pokemonList.collect { pokemonList ->
+                        // Ignore the initial empty list while page 0 is loading. Submitting an
+                        // empty list to an empty adapter runs the callback right away and sets
+                        // isLoading to false too early.
+                        if (pokemonList.isNotEmpty() || adapter.currentList.isNotEmpty()) {
+                            adapter.submitList(pokemonList) { viewModel.onPokemonListCommitted() }
+                        }
+                    }
                 }
                 launch {
                     viewModel.toastMessage.filterNotNull().collect { message ->
